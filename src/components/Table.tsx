@@ -1,23 +1,13 @@
 import "bootstrap/dist/css/bootstrap.css";
-import { useEffect } from "react";
 
 import type { productType } from "../types/productType";
 
 type TableProps = {
   products: Array<productType>;
   setSelectProduct: (p: productType) => void;
-  checkLoginStatus: () => Promise<void>;
 };
 
-const Table = ({
-  products,
-  setSelectProduct,
-  checkLoginStatus,
-}: TableProps) => {
-  useEffect(() => {
-    checkLoginStatus();
-  }, []);
-
+const Table = ({ products, setSelectProduct }: TableProps) => {
   return (
     <table className="table">
       <thead>

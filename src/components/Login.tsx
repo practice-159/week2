@@ -1,6 +1,6 @@
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.css";
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 
 // import "../styles/style.css";
@@ -27,6 +27,20 @@ const login = () => {
   const [selectProduct, setSelectProduct] = useState<productType | null>(null);
   const [products, setProducts] = useState([]);
 
+  const changeUserName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAccount((preData) => {
+      const { name, value } = e.target;
+      return { ...preData, [name]: value };
+    });
+  };
+
+  const changePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAccount((preData) => {
+      const { name, value } = e.target;
+      return { ...preData, [name]: value };
+    });
+  };
+
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
       e.preventDefault();
@@ -42,19 +56,9 @@ const login = () => {
     }
   };
 
-  const changeUserName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAccount((preData) => {
-      const { name, value } = e.target;
-      return { ...preData, [name]: value };
-    });
-  };
-
-  const changePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAccount((preData) => {
-      const { name, value } = e.target;
-      return { ...preData, [name]: value };
-    });
-  };
+  useEffect(() => {
+    checkLoginStatus();
+  }, []);
 
   const checkLoginStatus = async () => {
     try {
@@ -62,14 +66,17 @@ const login = () => {
         .split(";")
         .find((txt) => txt.startsWith("someCookieName="))
         ?.split("=")[1];
-      api.defaults.headers.common["Authorization"] = token;
-      let response = await api.post("/v2/api/user/check");
-      if (response.status === 200) {
-        console.log("檢查登入狀態 200 OK");
-        console.log(response.status);
+      if (token) {
+        api.defaults.headers.common["Authorization"] = token;
+        let response = await api.post("/v2/api/user/check");
+        console.log(response);
+        if (response.data.success) {
+          setIsAuth(true);
+          getProducts();
+        }
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -81,7 +88,6 @@ const login = () => {
       //   ?.split("=")[1];
       // axios.defaults.headers.common["Authorization"] = token;
       const response = await api.get(`/v2/api/${API_PATH}/admin/products`);
-      console.log(response.data.products);
       setProducts(response.data.products);
     } catch (error) {
       console.error(error);
@@ -146,11 +152,7 @@ const login = () => {
                 確認登入狀態
               </button> */}
               {/* 左側列表 */}
-              <Table
-                products={products}
-                setSelectProduct={setSelectProduct}
-                checkLoginStatus={checkLoginStatus}
-              />
+              <Table products={products} setSelectProduct={setSelectProduct} />
             </div>
             <div className="col">
               {/* 右側列表 */}
